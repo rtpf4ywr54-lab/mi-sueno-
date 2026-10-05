@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi sueño">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#5b5bd6">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-512.png">
+<title>Mi sueño</title>
+<style>
+:root{--bg:#f4f5fb;--card:#fff;--tx:#1b1d2a;--mu:#6b6f85;--bd:#e3e5f0;--ac:#5b5bd6;--ok:#1f9d63;--warn:#e0a100;--bad:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12131c;--card:#1c1e2b;--tx:#eceefa;--mu:#9a9eb8;--bd:#2c2f42;--ac:#8c8cff;--ok:#3fc489;--warn:#f0b92e;--bad:#ef6a6a}}
+:root[data-theme="dark"]{--bg:#12131c;--card:#1c1e2b;--tx:#eceefa;--mu:#9a9eb8;--bd:#2c2f42;--ac:#8c8cff;--ok:#3fc489;--warn:#f0b92e;--bad:#ef6a6a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.w{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:1.5rem;margin:0 0 4px}.sub{color:var(--mu);margin:0 0 16px;font-size:.92rem}
+.top{display:grid;grid-template-columns:1fr 230px;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.top{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.nap{display:flex;flex-direction:column;gap:6px}.nap label{display:flex;gap:6px;align-items:center;font-size:.85rem}.nap input[type=checkbox]{width:20px;height:20px}.nap input[type=number]{width:100%}
+.st b{display:block;font-size:1.4rem}.st span{color:var(--mu);font-size:.8rem}
+.ring{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring svg{width:150px;height:150px}.ring .lb{font-weight:600;margin-top:6px}.ring small{color:var(--mu)}
+.row{display:grid;grid-template-columns:86px 1fr 1fr 1.1fr 1.3fr 58px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.row.h{border-top:0;color:var(--mu);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;padding-top:0}
+.day{font-weight:600}
+input[type=time],input[type=number]{width:100%;padding:8px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+.rec b{font-size:1.05rem;color:var(--ac)}.rec small{display:block;color:var(--mu)}
+.badge{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:99px;margin-top:4px}
+.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.sh{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.lg{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
+.mini{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;border:4px solid var(--bd);justify-self:end}
+@media(max-width:700px){.row{grid-template-columns:1fr 1fr;}.row.h{display:none}.row>.day{grid-column:1/-1}.mini{justify-self:start}}
+.pre{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;color:var(--mu);font-size:.88rem}
+.pre input{width:90px}
+button{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}
+details{margin-top:14px}summary{cursor:pointer;font-weight:600}
+details p,details li{color:var(--mu);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>🌙 Mi sueño</h1>
+  <p class="sub">Meta: 7–9 h por noche. Escribe a qué hora te levantas cada día y cuánto dormiste.</p>
+
+  <div class="top">
+    <div class="card">
+      <div class="stats">
+        <div class="st"><b id="sAvg">–</b><span>Promedio de horas</span></div>
+        <div class="st"><b id="sBal">–</b><span>Sueño acumulado (vs 8 h)</span></div>
+        <div class="st"><b id="sOk">–</b><span>Días que cumpliste</span></div>
+        <div class="st"><b id="sNap">–</b><span>Sueño que sumaron tus siestas</span></div>
+      </div>
+      <p id="msg" class="sub" style="margin:14px 0 0"></p>
+      <div class="pre">Horas que debo dormir de domingo a lunes (se calcula solo):
+        <input type="text" id="mon" readonly style="width:110px;padding:8px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit">
+        <span id="carry"></span>
+        <button id="rst">Reiniciar semana</button>
+      </div>
+    </div>
+    <div class="card ring">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--bd)" stroke-width="12"/>
+        <circle id="arc" cx="60" cy="60" r="50" fill="none" stroke="var(--ac)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 314" transform="rotate(-90 60 60)"/>
+        <text id="sc" x="60" y="67" text-anchor="middle" font-size="30" font-weight="700" fill="var(--tx)">–</text></svg>
+      <div class="lb" id="lbl">Sin datos</div><small>Calidad de sueño</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row h"><div>Día</div><div>Me levanto a las</div><div>Dormí (horas)</div><div>Siesta</div><div>Debo dormirme a las</div><div style="text-align:right">Nota</div></div>
+    <div id="rows"></div>
+  </div>
+
+  <details class="card">
+    <summary>¿Cómo funciona el sueño acumulado?</summary>
+    <p>Al presionar "Reiniciar semana", el dashboard guarda tu deuda (o sueño a favor) y la usa en la semana nueva: de ahí sale cuántas horas debes dormir de domingo a lunes (siempre entre 7 y 9 h).</p>
+    <p>Las siestas suman por tramos: los primeros 30 min cuentan al 50 %, de 30 a 90 min cuentan al 30 % y lo que pase de 90 min cuenta al 15 %. Descansan menos que el sueño de la noche y las largas pueden quitarte sueño después. Es una estimación a partir de lo que se sabe en general sobre las siestas, no una cifra exacta.</p>
+    <p>Cada noche que duermes menos de 8 h se suma una "deuda" de sueño; cada noche que duermes más, se resta. La deuda se acumula y afecta atención, ánimo y rendimiento, aunque ya no sientas tanto cansancio.</p>
+    <p>No se paga de golpe: lo sano es recuperar de a poco, durmiendo un poco más cada noche (hasta ~9 h) y manteniendo un horario regular, no con una sola noche de 12 h ni con siestas largas.</p>
+    <ul>
+      <li><b>Horas recomendadas</b> = 8 h − 25 % del balance acumulado, limitado entre 7 y 9 h.</li>
+      <li><b>Hora de dormir</b> = hora de levantarte − horas recomendadas − 15 min para conciliar el sueño.</li>
+      <li><b>Calidad</b> = 60 % duración (7–9 h), 25 % regularidad de la hora de levantarte, 15 % sueño acumulado.</li>
+    </ul>
+    <p>Es una estimación orientativa, no un diagnóstico médico. Si sigues cansado durmiendo bien, consulta a un profesional.</p>
+  </details>
+</div>
+<script>
+var D=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+var lastBal=0;var S={carry:0,d:D.map(function(){return{w:"",h:"",n:false,m:""}})};
+try{var raw=localStorage.getItem("sueno-v2");if(raw){var p=JSON.parse(raw);if(p&&p.d&&p.d.length===7)S=p}else{var o=localStorage.getItem("sueno-v1");if(o){var q=JSON.parse(o);if(q&&q.d&&q.d.length===7)q.d.forEach(function(x,i){S.d[i].w=x.w;S.d[i].h=x.h})}}}catch(e){}
+if(S.carry===undefined){S.carry=S.mon!==undefined?4*(8-cl(S.mon,7,9)):0;delete S.mon}
+function save(){try{localStorage.setItem("sueno-v2",JSON.stringify(S))}catch(e){}}
+function cl(x,a,b){return Math.max(a,Math.min(b,x))}
+function mins(t){var a=t.split(":");return +a[0]*60+ +a[1]}
+function fmt(m){m=((Math.round(m)%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60,s=h>=12?"p. m.":"a. m.",h12=h%12||12;return h12+":"+(mm<10?"0":"")+mm+" "+s}
+function fh(x){var n=Math.round(x*60),h=Math.floor(Math.abs(n)/60),m=Math.abs(n)%60;return (x<0?"-":"")+h+" h "+(m<10?"0":"")+m+" m"}
+function dur(h){return h>=7&&h<=9?100:h<7?Math.max(0,100-(7-h)*25):Math.max(0,100-(h-9)*20)}
+function col(s){return s>=85?"var(--ok)":s>=70?"var(--ac)":s>=50?"var(--warn)":"var(--bad)"}
+function lab(s){return s>=85?"Excelente":s>=70?"Buena":s>=50?"Regular":"Mala"}
+var rows=document.getElementById("rows");
+D.forEach(function(n,i){var r=document.createElement("div");r.className="row";
+r.innerHTML='<div class="day">'+n+'</div><div><input type="time" data-i="'+i+'" data-k="w"></div><div><input type="number" min="0" max="16" step="0.25" placeholder="ej. 7.5" data-i="'+i+'" data-k="h"></div><div class="nap"><label><input type="checkbox" data-i="'+i+'" data-k="n"> ¿Tomaste una siesta?</label><input type="number" min="0" max="240" step="5" placeholder="¿Cuántos minutos?" data-i="'+i+'" data-k="m"></div><div class="rec" id="rec'+i+'"></div><div class="mini" id="mn'+i+'">–</div>';rows.appendChild(r)});
+rows.addEventListener("input",function(e){var t=e.target,i=t.dataset.i;if(i==null)return;S.d[i][t.dataset.k]=t.type==="checkbox"?t.checked:t.value;save();calc()});
+rows.addEventListener("change",function(e){var t=e.target;if(t.type==="checkbox"&&t.dataset.i!=null){S.d[t.dataset.i].n=t.checked;if(!t.checked)S.d[t.dataset.i].m="";save();load();calc()}});
+function napCredit(m){var c=Math.min(m,30)*0.5;if(m>30)c+=(Math.min(m,90)-30)*0.3;if(m>90)c+=(m-90)*0.15;return c}
+document.getElementById("rst").onclick=function(){S.carry=Math.round(cl(lastBal,-10,10)*100)/100;S.d=D.map(function(){return{w:"",h:"",n:false,m:""}});save();load();calc()};
+function load(){rows.querySelectorAll("input").forEach(function(el){var d=S.d[el.dataset.i];if(el.type==="checkbox")el.checked=!!d.n;else{el.value=d[el.dataset.k]||"";if(el.dataset.k==="m")el.disabled=!d.n}})}
+function calc(){
+ var bal=S.carry||0,napT=0,hs=[],ws=[],ok=0,logged=0,ds=[];
+ for(var i=0;i<7;i++){
+  var d=S.d[i],need=cl(8-0.25*bal,7,9),rec=document.getElementById("rec"+i),mn=document.getElementById("mn"+i);
+  if(d.w){rec.innerHTML="<b>"+fmt(mins(d.w)-need*60-15)+"</b><small>para dormir "+fh(need)+"</small>";ws.push(mins(d.w))}
+  else rec.innerHTML='<small>Pon tu hora de levantarte</small>';
+  var h=parseFloat(d.h);
+  if(d.h!==""&&!isNaN(h)){
+   logged++;hs.push(h);var s=dur(h);ds.push(s);if(h>=7&&h<=9)ok++;
+   var b=h<7?["sh","Dormiste poco"]:h>9?["lg","Dormiste de más"]:["ok","Cumpliste ✓"];
+   if(h<7||h>9)rec.innerHTML+='';
+   rec.innerHTML+='<span class="badge '+b[0]+'">'+b[1]+(h>=7&&h<=9?"":" ("+fh(h)+")")+'</span>';
+   mn.textContent=Math.round(s);mn.style.borderColor=col(s);mn.style.color=col(s);
+   var nc=0;if(d.n){var nm=parseFloat(d.m);if(nm>0){nc=napCredit(nm)/60;napT+=nc;rec.innerHTML+='<span class="badge '+(nm>30?"lg":"ok")+'" style="margin-left:4px">Siesta '+Math.round(nm)+' min: +'+fh(nc)+'</span>'+(nm>90?'<small>Siesta muy larga: puede quitarte sueño en la noche</small>':nm>30?'<small>Más de 30 min: puede dejarte aturdido al despertar</small>':'')}}
+   bal+=h+nc-8;
+  }else{mn.textContent="–";mn.style.borderColor="var(--bd)";mn.style.color="var(--mu)"}
+ }
+ var avg=hs.length?hs.reduce(function(a,b){return a+b},0)/hs.length:null;
+ document.getElementById("sAvg").textContent=avg==null?"–":fh(avg);
+ document.getElementById("sNap").textContent=napT?"+"+fh(napT):"–";
+ document.getElementById("sBal").textContent=logged||S.carry?(bal>=0?"+":"")+fh(bal):"–";
+ document.getElementById("sOk").textContent=logged?ok+" / "+logged:"–";
+ lastBal=bal;
+ document.getElementById("mon").value=fh(cl(8-0.25*(S.carry||0),7,9));
+ document.getElementById("carry").textContent=S.carry<0?"Deuda arrastrada: "+fh(-S.carry):S.carry>0?"Sueño a favor arrastrado: "+fh(S.carry):"Sin deuda arrastrada";
+ var msg=document.getElementById("msg");
+ if(!logged)msg.textContent="Registra cuánto dormiste para ver tu calidad de sueño y tu sueño acumulado.";
+ else if(bal<-0.5)msg.textContent="Llevas "+fh(-bal)+" de deuda de sueño. Recupera de a poco: te recomendé dormir un poco más cada noche.";
+ else if(bal>1)msg.textContent="Vas con "+fh(bal)+" de sueño a favor. Mantén tu horario regular.";
+ else msg.textContent="Tu balance de sueño está equilibrado. ¡Sigue así!";
+ var sc=null;
+ if(logged){
+  var dm=ds.reduce(function(a,b){return a+b},0)/ds.length,cons=100;
+  if(ws.length>1){var m=ws.reduce(function(a,b){return a+b},0)/ws.length,v=Math.sqrt(ws.reduce(function(a,b){return a+(b-m)*(b-m)},0)/ws.length);cons=cl(100-v/90*100,0,100)}
+  var bs=cl(100-Math.max(0,-bal)*12.5,0,100);
+  sc=Math.round(0.6*dm+0.25*cons+0.15*bs);
+ }
+ var arc=document.getElementById("arc");
+ if(sc==null){arc.setAttribute("stroke-dasharray","0 314");document.getElementById("sc").textContent="–";document.getElementById("lbl").textContent="Sin datos"}
+ else{arc.setAttribute("stroke-dasharray",(314*sc/100)+" 314");arc.setAttribute("stroke",col(sc));document.getElementById("sc").textContent=sc;document.getElementById("lbl").textContent=lab(sc);document.getElementById("lbl").style.color=col(sc)}
+}
+load();calc();
+</script>
+</body>
+</html>
