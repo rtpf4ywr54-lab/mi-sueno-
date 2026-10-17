@@ -54,14 +54,14 @@ details p,details li{color:var(--mu);font-size:.9rem}
     <div class="card">
       <div class="stats">
         <div class="st"><b id="sAvg">–</b><span>Promedio de horas</span></div>
-        <div class="st"><b id="sBal">–</b><span>Sueño acumulado (vs 8 h)</span></div>
+        <div class="st"><b id="sBal">–</b><span>Sueño acumulado</span></div>
         <div class="st"><b id="sOk">–</b><span>Días que cumpliste</span></div>
         <div class="st"><b id="sNap">–</b><span>Sueño que sumaron tus siestas</span></div>
       </div>
       <p id="msg" class="sub" style="margin:14px 0 0"></p>
       <div class="pre">Horas que debo dormir de domingo a lunes (se calcula solo):
         <input type="text" id="mon" readonly style="width:110px;padding:8px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit">
-        <span id="carry"></span>
+        <span id="carry"></span><div id="hab" style="width:100%"></div>
         <button id="rst">Reiniciar semana</button>
       </div>
     </div>
@@ -80,23 +80,25 @@ details p,details li{color:var(--mu);font-size:.9rem}
 
   <details class="card">
     <summary>¿Cómo funciona el sueño acumulado?</summary>
-    <p>Al presionar "Reiniciar semana", el dashboard guarda tu deuda (o sueño a favor) y la usa en la semana nueva: de ahí sale cuántas horas debes dormir de domingo a lunes (siempre entre 7 y 9 h).</p>
-    <p>Las siestas suman por tramos: los primeros 30 min cuentan al 50 %, de 30 a 90 min cuentan al 30 % y lo que pase de 90 min cuenta al 15 %. Descansan menos que el sueño de la noche y las largas pueden quitarte sueño después. Es una estimación a partir de lo que se sabe en general sobre las siestas, no una cifra exacta.</p>
-    <p>Cada noche que duermes menos de 8 h se suma una "deuda" de sueño; cada noche que duermes más, se resta. La deuda se acumula y afecta atención, ánimo y rendimiento, aunque ya no sientas tanto cansancio.</p>
-    <p>No se paga de golpe: lo sano es recuperar de a poco, durmiendo un poco más cada noche (hasta ~9 h) y manteniendo un horario regular, no con una sola noche de 12 h ni con siestas largas.</p>
+    <p>Dormir entre 7 y 9 h cuenta como cumplir. La deuda de sueño solo aparece cuando duermes menos de 7 h: por cada hora que te falta para llegar a 7, sumas 1 h de deuda.</p>
+    <p>La deuda se paga de a poco: cada hora que duermes por encima de 7 h resta 1 h de deuda. El sueño a favor solo se genera si duermes más de 8 h y ya no tienes deuda, y se limita a 2 h, porque el sueño no se puede guardar mucho. La deuda máxima que cuenta es 10 h.</p>
+    <p>Dormir más de 9 h solo se marca como "de más" si no tenías deuda. Si tenías deuda, se cuenta como recuperación y no baja tu calidad de sueño.</p>
     <ul>
-      <li><b>Horas recomendadas</b> = 8 h − 25 % del balance acumulado, limitado entre 7 y 9 h.</li>
+      <li><b>Horas recomendadas</b> = 8 h + 25 % de tu deuda (o − 25 % de tu sueño a favor), siempre entre 7 y 9 h.</li>
       <li><b>Hora de dormir</b> = hora de levantarte − horas recomendadas − 15 min para conciliar el sueño.</li>
-      <li><b>Calidad</b> = 60 % duración (7–9 h), 25 % regularidad de la hora de levantarte, 15 % sueño acumulado.</li>
+      <li><b>Calidad</b> = 60 % duración (7–9 h), 25 % regularidad de la hora de levantarte, 15 % sueño acumulado. La regularidad compara cada día con tu horario habitual, que es la ventana de 2 h donde caen más de tus días. Dentro de la ventana no pierdes nada; a 2 h de distancia pierdes la mitad de ese día y a 4 h o más lo pierdes todo. Al reiniciar la semana el horario se guarda y se usa en los primeros 2 días de la semana siguiente; desde el tercer día se usa el de esa semana.</li>
     </ul>
+    <p>Las siestas suman por tramos: los primeros 30 min cuentan al 50 %, de 30 a 90 min al 30 % y lo que pase de 90 min al 15 %. Se suman a tu noche para calcular la deuda, así que ayudan cuando duermes menos de 7 h o cuando tienes deuda que pagar.</p>
+    <p>Una siesta de 3 a 120 min se considera buena si la tomas antes de las 4 p. m. y si debías sueño (dormiste menos de 7 h o traías deuda). Si pasa de 2 h o la tomas después de las 4 p. m., se marca en amarillo y la calidad de ese día baja poco a poco, porque puede quitarte sueño esa noche: hasta 10 puntos si dura 4 h o más y hasta 10 puntos si empieza a las 6 p. m. o después (máximo 15 en total). Los minutos de más igual cuentan como sueño. Si no debías sueño, también se marca en amarillo, pero no baja tu calidad. Una siesta buena también suma su crédito a tu noche en la nota del día (solo cuando dormiste menos de 7 h), sin pasar de 100.</p>
+    <p>Al presionar "Reiniciar semana", tu deuda (o sueño a favor) se reduce un 25 % y se guarda para la semana nueva, así lo viejo se va olvidando. De ahí sale cuántas horas debes dormir de domingo a lunes. Si reinicias sin haber registrado días, no cambia nada.</p>
     <p>Es una estimación orientativa, no un diagnóstico médico. Si sigues cansado durmiendo bien, consulta a un profesional.</p>
   </details>
 </div>
 <script>
 var D=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-var lastBal=0;var S={carry:0,d:D.map(function(){return{w:"",h:"",n:false,m:""}})};
+var lastBal=0,lastLogged=0,lastWk=null;var S={carry:0,d:D.map(function(){return{w:"",h:"",n:false,m:"",t:""}})};
 try{var raw=localStorage.getItem("sueno-v2");if(raw){var p=JSON.parse(raw);if(p&&p.d&&p.d.length===7)S=p}else{var o=localStorage.getItem("sueno-v1");if(o){var q=JSON.parse(o);if(q&&q.d&&q.d.length===7)q.d.forEach(function(x,i){S.d[i].w=x.w;S.d[i].h=x.h})}}}catch(e){}
-if(S.carry===undefined){S.carry=S.mon!==undefined?4*(8-cl(S.mon,7,9)):0;delete S.mon}
+if(S.carry===undefined){S.carry=S.mon!==undefined?4*(8-cl(S.mon,7,9)):0;delete S.mon}S.carry=cl(S.carry||0,-10,2);
 function save(){try{localStorage.setItem("sueno-v2",JSON.stringify(S))}catch(e){}}
 function cl(x,a,b){return Math.max(a,Math.min(b,x))}
 function mins(t){var a=t.split(":");return +a[0]*60+ +a[1]}
@@ -107,27 +109,46 @@ function col(s){return s>=85?"var(--ok)":s>=70?"var(--ac)":s>=50?"var(--warn)":"
 function lab(s){return s>=85?"Excelente":s>=70?"Buena":s>=50?"Regular":"Mala"}
 var rows=document.getElementById("rows");
 D.forEach(function(n,i){var r=document.createElement("div");r.className="row";
-r.innerHTML='<div class="day">'+n+'</div><div><input type="time" data-i="'+i+'" data-k="w"></div><div><input type="number" min="0" max="16" step="0.25" placeholder="ej. 7.5" data-i="'+i+'" data-k="h"></div><div class="nap"><label><input type="checkbox" data-i="'+i+'" data-k="n"> ¿Tomaste una siesta?</label><input type="number" min="0" max="240" step="5" placeholder="¿Cuántos minutos?" data-i="'+i+'" data-k="m"></div><div class="rec" id="rec'+i+'"></div><div class="mini" id="mn'+i+'">–</div>';rows.appendChild(r)});
+r.innerHTML='<div class="day">'+n+'</div><div><input type="time" data-i="'+i+'" data-k="w"></div><div><input type="number" min="0" max="16" step="0.25" placeholder="ej. 7.5" data-i="'+i+'" data-k="h"></div><div class="nap"><label><input type="checkbox" data-i="'+i+'" data-k="n"> ¿Tomaste una siesta?</label><input type="number" min="0" max="240" step="5" placeholder="¿Cuántos minutos?" data-i="'+i+'" data-k="m"><label style="flex-direction:column;align-items:stretch;gap:2px;color:var(--mu)">¿A qué hora la tomaste?<input type="time" data-i="'+i+'" data-k="t"></label></div><div class="rec" id="rec'+i+'"></div><div class="mini" id="mn'+i+'">–</div>';rows.appendChild(r)});
 rows.addEventListener("input",function(e){var t=e.target,i=t.dataset.i;if(i==null)return;S.d[i][t.dataset.k]=t.type==="checkbox"?t.checked:t.value;save();calc()});
-rows.addEventListener("change",function(e){var t=e.target;if(t.type==="checkbox"&&t.dataset.i!=null){S.d[t.dataset.i].n=t.checked;if(!t.checked)S.d[t.dataset.i].m="";save();load();calc()}});
+rows.addEventListener("change",function(e){var t=e.target;if(t.type==="checkbox"&&t.dataset.i!=null){S.d[t.dataset.i].n=t.checked;if(!t.checked){S.d[t.dataset.i].m="";S.d[t.dataset.i].t=""}save();load();calc()}});
+function dist(w,x){return x<w.a?w.a-x:x>w.b?x-w.b:0}
+function bestWin(ws){var c=[],best=-1,pick=null;ws.forEach(function(x){c.push(x);c.push(x-120)});c.forEach(function(t){var cov=ws.filter(function(x){return x>=t&&x<=t+120});if(cov.length>best){best=cov.length;pick=cov}});var lo=Math.min.apply(null,pick),hi=Math.max.apply(null,pick),mid=(lo+hi)/2;return{a:mid-60,b:mid+60}}
 function napCredit(m){var c=Math.min(m,30)*0.5;if(m>30)c+=(Math.min(m,90)-30)*0.3;if(m>90)c+=(m-90)*0.15;return c}
-document.getElementById("rst").onclick=function(){S.carry=Math.round(cl(lastBal,-10,10)*100)/100;S.d=D.map(function(){return{w:"",h:"",n:false,m:""}});save();load();calc()};
-function load(){rows.querySelectorAll("input").forEach(function(el){var d=S.d[el.dataset.i];if(el.type==="checkbox")el.checked=!!d.n;else{el.value=d[el.dataset.k]||"";if(el.dataset.k==="m")el.disabled=!d.n}})}
+document.getElementById("rst").onclick=function(){if(lastLogged)S.carry=Math.round(cl(lastBal,-10,2)*0.75*100)/100;if(lastWk)S.hab=lastWk;S.d=D.map(function(){return{w:"",h:"",n:false,m:"",t:""}});save();load();calc()};
+function load(){rows.querySelectorAll("input").forEach(function(el){var d=S.d[el.dataset.i];if(el.type==="checkbox")el.checked=!!d.n;else{el.value=d[el.dataset.k]||"";if(el.dataset.k==="m"||el.dataset.k==="t")el.disabled=!d.n}})}
 function calc(){
- var bal=S.carry||0,napT=0,hs=[],ws=[],ok=0,logged=0,ds=[];
+ var wk=[];S.d.forEach(function(x){if(x.w)wk.push(mins(x.w))});var win=wk.length>=3?bestWin(wk):(S.hab||null);lastWk=wk.length>=3?win:null;
+ var bal=cl(S.carry||0,-10,2),napT=0,hs=[],ws=[],ok=0,logged=0,ds=[];
  for(var i=0;i<7;i++){
   var d=S.d[i],need=cl(8-0.25*bal,7,9),rec=document.getElementById("rec"+i),mn=document.getElementById("mn"+i);
-  if(d.w){rec.innerHTML="<b>"+fmt(mins(d.w)-need*60-15)+"</b><small>para dormir "+fh(need)+"</small>";ws.push(mins(d.w))}
+  if(d.w){rec.innerHTML="<b>"+fmt(mins(d.w)-need*60-15)+"</b><small>para dormir "+fh(need)+"</small>";ws.push(mins(d.w));if(win&&dist(win,mins(d.w))>0)rec.innerHTML+='<small style="color:var(--warn)">Fuera de tu horario habitual</small>'}
   else rec.innerHTML='<small>Pon tu hora de levantarte</small>';
   var h=parseFloat(d.h);
   if(d.h!==""&&!isNaN(h)){
-   logged++;hs.push(h);var s=dur(h);ds.push(s);if(h>=7&&h<=9)ok++;
-   var b=h<7?["sh","Dormiste poco"]:h>9?["lg","Dormiste de más"]:["ok","Cumpliste ✓"];
-   if(h<7||h>9)rec.innerHTML+='';
+   logged++;hs.push(h);var rc=h>9&&bal<0;
+   var nm=d.n?parseFloat(d.m):0,nap=nm>0,tiny=nap&&nm<3,lng=nap&&nm>120,late=nap&&!tiny&&!!d.t&&mins(d.t)>=960,owed=bal<0||h<7;
+   var pen=0;if(nap&&!tiny){pen=(lng?cl((nm-120)/120,0,1)*10:0)+(d.t?cl((mins(d.t)-960)/120,0,1)*10:0);pen=Math.min(15,pen)}
+   var napBad=pen>0;
+   var ncs=(nap&&!tiny)?napCredit(nm)/60:0;var s=rc?100:dur(h<7?h+ncs:h);s=Math.max(0,s-pen);ds.push(s);if((h>=7&&h<=9)||rc)ok++;
+   var b=h<7?["sh","Dormiste poco"]:rc?["ok","Recuperaste sueño ✓"]:h>9?["lg","Dormiste de más"]:["ok","Cumpliste ✓"];
    rec.innerHTML+='<span class="badge '+b[0]+'">'+b[1]+(h>=7&&h<=9?"":" ("+fh(h)+")")+'</span>';
    mn.textContent=Math.round(s);mn.style.borderColor=col(s);mn.style.color=col(s);
-   var nc=0;if(d.n){var nm=parseFloat(d.m);if(nm>0){nc=napCredit(nm)/60;napT+=nc;rec.innerHTML+='<span class="badge '+(nm>30?"lg":"ok")+'" style="margin-left:4px">Siesta '+Math.round(nm)+' min: +'+fh(nc)+'</span>'+(nm>90?'<small>Siesta muy larga: puede quitarte sueño en la noche</small>':nm>30?'<small>Más de 30 min: puede dejarte aturdido al despertar</small>':'')}}
-   bal+=h+nc-8;
+   var nc=0;
+   if(nap){
+    if(tiny){rec.innerHTML+='<span class="badge" style="margin-left:4px;color:var(--mu)">Menos de 3 min: no cuenta</span>'}
+    else{
+     nc=napCredit(nm)/60;napT+=nc;var warn=napBad||!owed;
+     rec.innerHTML+='<span class="badge '+(warn?"lg":"ok")+'" style="margin-left:4px">Siesta '+Math.round(nm)+' min: +'+fh(nc)+(warn?"":" ✓")+'</span>';
+     if(lng)rec.innerHTML+='<small>Más de 2 h: puede quitarte sueño esta noche</small>';
+     if(late)rec.innerHTML+='<small>Después de las 4 p. m.: puede quitarte sueño esta noche</small>';
+     if(!owed)rec.innerHTML+='<small>No tenías deuda de sueño: la siesta no era necesaria</small>';
+     if(!d.t)rec.innerHTML+='<small>Agrega la hora para ver si fue buena hora</small>';
+    }
+   }
+   var eff=h+nc;
+   if(eff<7)bal+=eff-7;else if(bal<0)bal=Math.min(0,bal+(eff-7));else bal=Math.min(2,bal+Math.max(0,eff-8));
+   bal=cl(bal,-10,2);
   }else{mn.textContent="–";mn.style.borderColor="var(--bd)";mn.style.color="var(--mu)"}
  }
  var avg=hs.length?hs.reduce(function(a,b){return a+b},0)/hs.length:null;
@@ -135,7 +156,8 @@ function calc(){
  document.getElementById("sNap").textContent=napT?"+"+fh(napT):"–";
  document.getElementById("sBal").textContent=logged||S.carry?(bal>=0?"+":"")+fh(bal):"–";
  document.getElementById("sOk").textContent=logged?ok+" / "+logged:"–";
- lastBal=bal;
+ lastBal=bal;lastLogged=logged;
+ document.getElementById("hab").textContent=win?"Tu horario habitual para levantarte: "+fmt(win.a)+" a "+fmt(win.b):"Aún no hay horario habitual: registra al menos 3 horas de levantarte.";
  document.getElementById("mon").value=fh(cl(8-0.25*(S.carry||0),7,9));
  document.getElementById("carry").textContent=S.carry<0?"Deuda arrastrada: "+fh(-S.carry):S.carry>0?"Sueño a favor arrastrado: "+fh(S.carry):"Sin deuda arrastrada";
  var msg=document.getElementById("msg");
@@ -146,7 +168,7 @@ function calc(){
  var sc=null;
  if(logged){
   var dm=ds.reduce(function(a,b){return a+b},0)/ds.length,cons=100;
-  if(ws.length>1){var m=ws.reduce(function(a,b){return a+b},0)/ws.length,v=Math.sqrt(ws.reduce(function(a,b){return a+(b-m)*(b-m)},0)/ws.length);cons=cl(100-v/90*100,0,100)}
+  if(win&&ws.length){var tt=0;ws.forEach(function(w){tt+=100*(1-cl(dist(win,w)/240,0,1))});cons=tt/ws.length}
   var bs=cl(100-Math.max(0,-bal)*12.5,0,100);
   sc=Math.round(0.6*dm+0.25*cons+0.15*bs);
  }
